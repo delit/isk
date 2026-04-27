@@ -461,8 +461,11 @@
     border-bottom-color: var(--gold);
   }
 
-  /* Results - overflow guard prevents layout shift */
+  /* Results - overflow guard prevents layout shift. Stack above .panel (z-index:50)
+     so popovers/tooltips in this column are not covered when they overlap the sidebar. */
   .results {
+    position: relative;
+    z-index: 60;
     display: flex;
     flex-direction: column;
     gap: 32px;
@@ -557,6 +560,21 @@
     align-items: center;
     gap: 8px;
     white-space: nowrap;
+  }
+
+  @media (min-width: 901px) {
+    /* Default tooltip (right: -6px) grows left — at the main column's left edge it
+       tucks under the sidebar. Anchor like .section-label so the box opens rightward. */
+    .compare-label .info-icon .tooltip {
+      right: auto;
+      left: -6px;
+      width: 340px;
+    }
+
+    .compare-label .info-icon .tooltip::after {
+      right: auto;
+      left: 10px;
+    }
   }
 
   .compare-tabs {
