@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <title>ISK-kalkylator</title>
-  <rect width="512" height="512" fill="#0a0a0a"/>
-  <rect x="40" y="40" width="432" height="432" rx="88" ry="88" fill="none" stroke="#d4af37" stroke-width="9"/>
-  <text x="256" y="308" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="170" font-weight="600" fill="#d4af37" letter-spacing="0.02em">ISK</text>
-</svg>

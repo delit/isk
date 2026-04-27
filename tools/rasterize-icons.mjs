@@ -7,8 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 
 const targets = [
-  { svg: 'claude/2/icons/icon.svg', out192: 'claude/2/icons/icon-192.png', out512: 'claude/2/icons/icon-512.png' },
-  { svg: 'claude/icons/icon.svg', out192: 'claude/icons/icon-192.png', out512: 'claude/icons/icon-512.png' }
+  { svg: 'icons/icon.svg', out192: 'icons/icon-192.png', out512: 'icons/icon-512.png' },
 ];
 
 for (const t of targets) {
