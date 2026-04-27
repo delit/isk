@@ -1,0 +1,10 @@
+{
+  "name": "isk-pwa-assets",
+  "private": true,
+  "scripts": {
+    "icons": "node tools/rasterize-icons.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.33.5"
+  }
+}

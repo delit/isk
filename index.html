@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Gratis ISK-kalkylator i webbläsaren: simulera värdeutveckling med avkastning, månadssparande och ISK-skatt. Diagram, tabell, jämförelser, ekonomisk frihet (FIRE) och avgiftsanalys — prognoser, inte finansiell rådgivning.">
+<!-- Byt URL till er publicerade adress -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="ISK-Kalkylator · Värdeutveckling">
+<meta property="og:description" content="Gratis ISK-kalkylator i webbläsaren: simulera värdeutveckling med avkastning, månadssparande och ISK-skatt. Diagram, tabell, jämförelser, FIRE och avgiftsanalys.">
+<meta property="og:url" content="https://delit.github.io/isk/">
+<meta property="og:locale" content="sv_SE">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ISK-Kalkylator · Värdeutveckling">
+<meta name="twitter:description" content="Gratis ISK-kalkylator i webbläsaren: simulera värdeutveckling med avkastning, månadssparande och ISK-skatt. Diagram, tabell, jämförelser, FIRE och avgiftsanalys.">
+<title>ISK-Kalkylator · Värdeutveckling</title>
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg" sizes="any">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"ISK-Kalkylator","applicationCategory":"FinanceApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"SEK"},"description":"Gratis webbapplikation för simulering av investeringssparkonto (ISK): värdeutveckling, skatt, diagram och jämförelser."}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ISK-kalk">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="container">
+  <header>
+    <div class="title-block">
+      <h1>ISK-<em>kalkylator</em></h1>
+    </div>
+    <p class="subtitle">En överblick över hur olika avkastning och insättningsperioder formar ditt kapital över tid.</p>
+  </header>
+
+  <div class="layout">
+    <aside class="panel panel-sticky">
+
+      <div class="field">
+        <div class="field-label-row">
+          <label for="start">Startkapital</label>
+          <button type="button" class="info-icon" aria-label="Info om startvärde">
+            <span class="tooltip">Det belopp i kronor som redan finns på ditt ISK vid beräkningens start.</span>
+          </button>
+        </div>
+        <div class="input-wrap">
+          <input type="text" id="start" value="500 000" inputmode="numeric" data-format="number">
+          <span class="suffix">SEK</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label-row">
+          <label for="monthly">Månadssparande</label>
+          <button type="button" class="info-icon" aria-label="Info om månadssparande">
+            <span class="tooltip">Summan du sätter in varje månad. Insättningen antas ske vid månadens början.</span>
+          </button>
+        </div>
+        <div class="input-wrap">
+          <input type="text" id="monthly" value="5 000" inputmode="numeric" data-format="number">
+          <span class="suffix">SEK / mån</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label-row">
+          <label for="years">Antal år</label>
+          <button type="button" class="info-icon" aria-label="Info om antal år">
+            <span class="tooltip">Hur många år vill du spara? Antalet år motsvarar hela prognosperioden från start till slut, alltså hur länge dina pengar ska få växa. Halvår tillåtna — skriv t.ex. 9,5 för nio och ett halvt år.</span>
+          </button>
+        </div>
+        <div class="input-wrap">
+          <input type="text" id="years" value="10" inputmode="decimal" data-format="decimal">
+          <span class="suffix">År</span>
+        </div>
+      </div>
+
+      <div class="advanced-toggle-wrap">
+        <button type="button" class="advanced-toggle" id="advancedToggle" aria-expanded="false">
+          <svg class="adv-chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="4 2 8 6 4 10"/>
+          </svg>
+          <span>Avancerat</span>
+        </button>
+        <div class="advanced-body" id="advancedBody">
+          <div class="field">
+            <div class="field-label-row">
+              <label for="fee">Avgift</label>
+              <button type="button" class="info-icon" aria-label="Info om fondavgift">
+                <span class="tooltip">Fondavgifter är löpande kostnader, oftast 0,1–2 % årligen, som dras automatiskt från fondens värde. Indexfonder kostar lägst (ofta 0,1–0,5 %), medan aktivt förvaltade fonder är dyrare (1–2 %). Avgiften täcker förvaltning och administration. Det är avgörande att välja låga avgifter, då skillnader kan kosta tiotusentals kronor över tid.</span>
+              </button>
+            </div>
+            <div class="input-wrap">
+              <input type="text" id="fee" value="0,2" inputmode="decimal" data-format="decimal">
+              <span class="suffix">% / år</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label-row">
+              <label for="monthlyIncrease">Ökning av månadssparande</label>
+              <button type="button" class="info-icon" aria-label="Info om ökning av månadssparande">
+                <span class="tooltip">Procentuell höjning av ditt månadssparande varje år. Värdet 0 % innebär att du sätter in samma belopp varje månad under hela perioden. Anger du t.ex. 3 % så ökas månadssparandet med 3 % vid varje årsskifte — ett vanligt upplägg när lönen stiger. Höjningen sker trappvis per år, inte löpande.</span>
+              </button>
+            </div>
+            <div class="input-wrap">
+              <input type="text" id="monthlyIncrease" value="0" inputmode="decimal" data-format="decimal">
+              <span class="suffix">% / år</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label-row">
+              <label for="tax">ISK-skatt</label>
+              <button type="button" class="info-icon" aria-label="Info om ISK-skatt">
+                <span class="tooltip">Årlig schablonskatt på kontots värde. Appliceras vid varje årsskifte på beloppet som överstiger grundavdraget.</span>
+              </button>
+            </div>
+            <div class="input-wrap">
+              <input type="text" id="tax" value="1,065" inputmode="decimal" data-format="decimal">
+              <span class="suffix">% / år</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label-row">
+              <label for="freeAmount">Grundavdrag ISK-skatt</label>
+              <button type="button" class="info-icon" aria-label="Info om grundavdrag">
+                <span class="tooltip">Det skattefria tröskelbeloppet. Endast värdet över denna gräns beskattas. Standard 300 000 kr.</span>
+              </button>
+            </div>
+            <div class="input-wrap">
+              <input type="text" id="freeAmount" value="300 000" inputmode="numeric" data-format="number">
+              <span class="suffix">SEK</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="window._userTriggered = true; calculate()">Beräkna Utveckling</button>
+    </aside>
+
+    <section class="results" id="results">
+      <div>
+        <div class="summary-grid" id="summaryGrid"></div>
+
+        <div class="section-label">
+          <span>Välj avkastning</span>
+          <button type="button" class="info-icon" aria-label="Info om avkastningsval">
+            <span class="tooltip">Här väljer du vilken årlig avkastning som ska visas i detalj nedan — både i sammanfattningskorten, diagrammet och tabellen.<br><br>Som grovt, långsiktigt <em>rimligt</em> antagande nämns ofta någonstans kring <em>7 %</em> per år före inflation för en väl spridd aktieexponering (historiskt, inte någon garanti).</span>
+          </button>
+          <span class="rule"></span>
+        </div>
+        <div class="rate-tabs" id="rateTabs"></div>
+        <div class="chart-box">
+          <div class="chart-canvas-wrap">
+            <canvas id="chart"></canvas>
+          </div>
+          <div class="compare-bar">
+            <div class="compare-label">
+              <span>Jämför med</span>
+              <button type="button" class="info-icon" aria-label="Info om jämförelse">
+                <span class="tooltip">Välj en annan avkastning att rita in i diagrammet tillsammans med den du valt ovan.<br><br>Jämförelsekursen visas i en helt annan färgskala så det blir enkelt att se skillnaden.<br><br><em>Stopp 2 år</em> betyder att månadssparandet upphör efter två år, men kapitalet fortsätter att växa.<br><br><em>Inget sparande</em> visar hur enbart startvärdet utvecklas utan några månadsinsättningar.<br><br>Klicka samma procentknapp igen för att stänga av jämförelsen.</span>
+              </button>
+            </div>
+            <div class="compare-tabs" id="compareTabs"></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">
+          <span>Årlig utveckling</span>
+          <button type="button" class="info-icon" aria-label="Info om tabellen">
+            <span class="tooltip">Tabellen visar kapitalets utveckling år för år. Varje kolumn är ett scenario där du slutat sätta in pengar vid en viss tidpunkt.<br><br><em>Stopp 2 år</em> betyder att du sparar i två år och sedan låter kapitalet växa utan fler insättningar.<br><br><em>Inget sparande</em> visar hur enbart startvärdet utvecklas.<br><br>Den gula raden längst ned är slutvärdet, och raden därunder visar differensen mot att ha sparat hela perioden.</span>
+          </button>
+          <span class="rule"></span>
+        </div>
+        <div class="table-wrap">
+          <table id="table"></table>
+        </div>
+      </div>
+
+      <div class="fire-section" id="fireSection">
+        <button type="button" class="fire-toggle" id="fireToggle" aria-expanded="false">
+          <span class="fire-toggle-left">
+            <svg class="fire-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <!-- Curved trunk -->
+              <path d="M12 9 C 11 13, 10 17, 7.5 21"/>
+              <!-- Six palm fronds radiating from top -->
+              <path d="M12 9 C 9 7, 5.5 6.5, 3 8"/>
+              <path d="M12 9 C 9.5 6, 7 4, 4 3.5"/>
+              <path d="M12 9 C 11 6, 10 3.5, 9 2"/>
+              <path d="M12 9 C 13 6, 14 3.5, 15 2"/>
+              <path d="M12 9 C 14.5 6, 17 4, 20 3.5"/>
+              <path d="M12 9 C 15 7, 18.5 6.5, 21 8"/>
+              <!-- Two coconuts -->
+              <circle cx="11.2" cy="10" r="0.55" fill="currentColor"/>
+              <circle cx="13" cy="10.3" r="0.55" fill="currentColor"/>
+              <!-- Small grass hints at base -->
+              <path d="M6 21.2 L 7 20.5 M 7.5 21.2 L 8.3 20.5 M 9 21.2 L 9.8 20.5"/>
+            </svg>
+            <span class="fire-title">Ekonomisk frihet - hur mycket pengar behöver du?</span>
+          </span>
+          <span class="fire-chevron">⌄</span>
+        </button>
+        <div class="fire-body">
+          <div class="fire-inner">
+            <div class="fire-intro-grid">
+              <div class="fire-intro-text">
+                <p class="fire-intro">
+                  FIRE står för <em>Financial Independence, Retire Early</em>. Metoden utgår från att du kan leva på en årlig uttagsprocent av ditt kapital utan att det tar slut. <strong>4 %-regeln</strong> är baserad på forskning av William Bengen och betyder att du kan ta ut 4 % av kapitalet per år i ungefär 30 år.
+                </p>
+                <p class="fire-intro">
+                  Beräkningen tar hänsyn till inflation, så pengarna förlorar inte sin <em>köpkraft</em> över tid — uttaget antas räknas upp varje år för att motsvara samma levnadsstandard.
+                </p>
+              </div>
+              <div class="fire-intro-visual" aria-hidden="true">
+                <svg viewBox="0 10 220 200" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="fireJarGrad" x1="0" y1="1" x2="0" y2="0">
+                      <stop offset="0%" stop-color="#8c7428"/>
+                      <stop offset="100%" stop-color="#f5cf5a"/>
+                    </linearGradient>
+                  </defs>
+                  <!-- Jar outline -->
+                  <rect x="50" y="42" width="120" height="18" rx="3" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+                  <path d="M 56 60 L 56 190 Q 56 200 66 200 L 154 200 Q 164 200 164 190 L 164 60 Z" fill="none" stroke="#d4af37" stroke-width="1.5"/>
+                  <!-- Fill representing 25 years of savings -->
+                  <path d="M 57 80 L 57 189 Q 57 199 67 199 L 153 199 Q 163 199 163 189 L 163 80 Z" fill="url(#fireJarGrad)" opacity="0.18"/>
+                  <!-- Top label -->
+                  <text x="110" y="30" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#d4af37" letter-spacing="2.5">SPARMÅL</text>
+                  <!-- 25× centered -->
+                  <text x="110" y="112" text-anchor="middle" font-family="Fraunces, serif" font-style="italic" font-size="42" fill="#f5cf5a" font-weight="300">25×</text>
+                  <text x="110" y="134" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8" fill="#9a9185" letter-spacing="2">ÅRSUTGIFTER</text>
+                  <!-- Equals sign -->
+                  <text x="110" y="158" text-anchor="middle" font-family="Fraunces, serif" font-size="16" fill="#d4af37" font-weight="400">=</text>
+                  <!-- Goal phrase -->
+                  <text x="110" y="182" text-anchor="middle" font-family="Fraunces, serif" font-style="italic" font-size="12" fill="#f5cf5a">Ekonomiskt fri</text>
+                </svg>
+              </div>
+            </div>
+
+            <div class="fire-kapital">
+              <span class="label" id="fireKapitalLabel">Ditt kapital</span>
+              <span class="value" id="fireKapital"></span>
+            </div>
+
+            <div class="fire-rate-picker">
+              <div class="fire-rate-label">
+                <span>Uttagsprocent per år</span>
+                <button type="button" class="info-icon fire-info" aria-label="Info om uttagsprocent">
+                  <span class="tooltip">Den andel av kapitalet du tar ut varje år.<br><br><em>3 %</em> — mycket försiktigt; kan hålla 40+ år.<br><br><em>4 %</em> — den klassiska regeln; ofta räknat som ~30 år.<br><br><em>5–6 %</em> — mer aggressivt; kräver ofta högre avkastning eller kortare horisont.</span>
+                </button>
+              </div>
+              <div class="fire-rates" id="fireRates"></div>
+            </div>
+
+            <div class="fire-results">
+              <div class="fire-card">
+                <div class="fc-label">Per år</div>
+                <div class="fc-value" id="firePerYear"></div>
+                <div class="fc-sub" id="firePerYearSub">Årligt uttag före eventuell skatt</div>
+              </div>
+              <div class="fire-card">
+                <div class="fc-label">Per månad</div>
+                <div class="fc-value" id="firePerMonth"></div>
+                <div class="fc-sub" id="firePerMonthSub">Månatligt uttag före eventuell skatt</div>
+              </div>
+            </div>
+
+            <div class="fire-tax-row">
+              <label class="fire-check">
+                <input type="checkbox" id="fireTaxCheckbox">
+                <span class="fire-check-box"></span>
+                <span class="fire-check-label">Räkna med ISK-skatt i uttaget</span>
+              </label>
+            </div>
+
+            <!-- FIRE number calculator (collapsible) -->
+            <div class="fire-number-section">
+              <button type="button" class="fire-number-toggle" id="fireNumberToggle" aria-expanded="false">
+                <span>Hur mycket pengar behöver du för ekonomisk frihet?</span>
+                <svg class="fire-number-chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="3 5 6 8 9 5"/>
+                </svg>
+              </button>
+
+              <div class="fire-number-body" id="fireNumberBody">
+                <div class="fire-number-input-row">
+                  <div class="fire-number-field">
+                    <div class="field-label-row">
+                      <label for="fireMonthlyExpenses">Dina utgifter varje månad</label>
+                      <button type="button" class="info-icon" aria-label="Info om månadskostnad">
+                        <span class="tooltip">Ange vad du spenderar per månad i dagens penningvärde. Inkludera boende, mat, transport, nöjen — allt du normalt gör av med varje månad.</span>
+                      </button>
+                    </div>
+                    <div class="input-wrap">
+                      <input type="text" id="fireMonthlyExpenses" value="25 000" inputmode="numeric" data-format="number">
+                      <span class="suffix">SEK</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="fire-number-results">
+                  <div class="fire-number-card">
+                    <div class="fnc-label">Ditt FIRE-nummer (4 %-regeln)</div>
+                    <div class="fnc-value gold" id="fireNumberTarget"></div>
+                    <div class="fnc-sub" id="fireNumberTargetSub"></div>
+                  </div>
+                  <div class="fire-number-card">
+                    <div class="fnc-label" id="fireNumberNowLabel">Ditt sparande</div>
+                    <div class="fnc-value" id="fireNumberNow"></div>
+                    <div class="fnc-sub" id="fireNumberProgress"></div>
+                  </div>
+                </div>
+
+                <h3 class="src-heading">Räkna ut antal år du har kvar till ekonomisk frihet</h3>
+
+                <div class="savings-rate-calc">
+                  <div class="src-field">
+                    <div class="field-label-row">
+                      <label for="srcMonthlySaving">Sparande per månad</label>
+                      <button type="button" class="info-icon" aria-label="Info om månadssparande">
+                        <span class="tooltip">Hur mycket du sparar varje månad i dagens penningvärde. Detta används tillsammans med din lön för att räkna ut din sparkvot.</span>
+                      </button>
+                    </div>
+                    <div class="input-wrap">
+                      <input type="text" id="srcMonthlySaving" value="10 000" inputmode="numeric" data-format="number">
+                      <span class="suffix">SEK</span>
+                    </div>
+                  </div>
+
+                  <div class="src-field">
+                    <div class="field-label-row">
+                      <label for="srcMonthlySalary">Månadslön efter skatt</label>
+                      <button type="button" class="info-icon" aria-label="Info om månadslön">
+                        <span class="tooltip">Din disponibla månadsinkomst efter skatt. Sparkvot räknas som sparande delat med lönen — ju högre kvot, desto snabbare når du ekonomisk frihet.</span>
+                      </button>
+                    </div>
+                    <div class="input-wrap">
+                      <input type="text" id="srcMonthlySalary" value="35 000" inputmode="numeric" data-format="number">
+                      <span class="suffix">SEK</span>
+                    </div>
+                  </div>
+
+                  <div class="src-field src-field-result">
+                    <div class="field-label-row">
+                      <label>År kvar</label>
+                      <button type="button" class="info-icon" aria-label="Info om uträkningen">
+                        <span class="tooltip">Beräknas från din aktuella sparkvot (sparande ÷ lön). Antar 5 % real avkastning, 4 %-regeln och att du startar från 0 kronor.</span>
+                      </button>
+                    </div>
+                    <div class="src-result">
+                      <span class="src-result-value" id="srcYearsResult">—</span>
+                      <span class="src-result-unit">år</span>
+                    </div>
+                    <div class="src-result-sub" id="srcRateSub"></div>
+                  </div>
+                </div>
+
+                <div class="fire-savings-chart" aria-label="Sparkvot och år till ekonomisk frihet">
+                  <div class="fsc-title-row">
+                    <div class="fsc-title">Sparkvot per månad → år till ekonomisk frihet</div>
+                    <button type="button" class="info-icon" aria-label="Info om diagrammet">
+                      <span class="tooltip">5 % real avkastning (efter inflation) och 4 %-regeln för uttag.<br><br>Allt utgår från 0 kronor och samma sparkvot varje månad. ISK-skatt och fondavgifter är inte inräknade.<br><br>Tabellen visar hur kraftfullt sparkvoten driver tiden till ekonomisk frihet.</span>
+                    </button>
+                  </div>
+                  <div class="fsc-subtitle">Sparkvot är andelen av din inkomst som går till sparande. Investerar du 30 % av lönen så är du ekonomiskt fri efter ca 28 år. Ju högre kvot, desto snabbare är du ekonomiskt fri.</div>
+                  <div class="fsc-bars" id="fireSavingsBars"></div>
+                </div>
+
+                <div class="fire-number-expl">
+                  <p class="fire-intro">
+                    <strong>Så hur fort kan du nå dit?</strong> Tiden beror nästan helt på din <em>sparkvot</em> — andelen av inkomsten som går till sparande. Mr. Money Mustache visade i sin <a href="https://www.mrmoneymustache.com/2012/01/13/the-shockingly-simple-math-behind-early-retirement/" target="_blank" rel="noopener">klassiska artikel</a> att matematiken är förvånansvärt enkel: den som sparar lite behöver arbeta ett helt liv, medan den som sparar mycket kan bli ekonomiskt fri på några få år.
+                  </p>
+
+                  <p class="fire-intro">
+                    Logiken är att en hög sparkvot gör två saker samtidigt: du bygger upp kapital snabbare <em>och</em> lever på mindre — vilket minskar storleken på det kapital du behöver.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fire-section" id="feeSection">
+        <button type="button" class="fire-toggle" id="feeToggle" aria-expanded="false">
+          <span class="fire-toggle-left">
+            <svg class="fire-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <!-- Coin stack -->
+              <ellipse cx="12" cy="5" rx="7" ry="2"/>
+              <path d="M5 5 v 4 c 0 1.1 3.1 2 7 2 s 7 -0.9 7 -2 v -4"/>
+              <path d="M5 9 v 4 c 0 1.1 3.1 2 7 2 s 7 -0.9 7 -2 v -4"/>
+              <path d="M5 13 v 4 c 0 1.1 3.1 2 7 2 s 7 -0.9 7 -2 v -4"/>
+              <!-- Down arrow overlay (representing fee eating capital) -->
+              <path d="M15 17 L 17 19 L 19 17" opacity="0.7"/>
+              <path d="M17 14 v 5" opacity="0.7"/>
+            </svg>
+            <span class="fire-title">Avgiftens påverkan - hur mycket pengar förlorar du?</span>
+          </span>
+          <span class="fire-chevron">⌄</span>
+        </button>
+        <div class="fire-body">
+          <div class="fire-inner">
+            <div class="fire-intro-grid fee-intro-grid">
+              <div class="fire-intro-text">
+                <p class="fire-intro">
+                  <strong>Jämför avgiftens påverkan på ditt sparande.</strong> Upplev själv varför banker och säljare sällan pratar om avgiftens betydelse.
+                </p>
+                <p class="fire-intro">
+                  Låg avgift är den viktigaste faktorn när du väljer en fond. Inte bara för att det är en kostnad som drar ner din avkastning, utan också för att avgiften har det starkaste sambandet med framtida avkastning. Här kan du se hur avgiften påverkar ditt sparande över tid.
+                </p>
+              </div>
+              <div class="fire-intro-visual" aria-hidden="true">
+                <svg viewBox="0 0 220 160" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="feeBarGrad" x1="0" y1="1" x2="0" y2="0">
+                      <stop offset="0%" stop-color="#8c7428"/>
+                      <stop offset="100%" stop-color="#f5cf5a"/>
+                    </linearGradient>
+                  </defs>
+                  <!-- Decreasing bars showing fee impact -->
+                  <rect x="20"  y="40"  width="22" height="110" fill="url(#feeBarGrad)" opacity="0.95"/>
+                  <rect x="52"  y="52"  width="22" height="98"  fill="url(#feeBarGrad)" opacity="0.75"/>
+                  <rect x="84"  y="68"  width="22" height="82"  fill="url(#feeBarGrad)" opacity="0.55"/>
+                  <rect x="116" y="85"  width="22" height="65"  fill="url(#feeBarGrad)" opacity="0.4"/>
+                  <rect x="148" y="104" width="22" height="46"  fill="url(#feeBarGrad)" opacity="0.28"/>
+                  <rect x="180" y="122" width="22" height="28"  fill="url(#feeBarGrad)" opacity="0.2"/>
+                  <!-- Baseline -->
+                  <line x1="12" y1="150" x2="210" y2="150" stroke="#d4af37" stroke-width="1" opacity="0.5"/>
+                  <!-- Down arrow -->
+                  <path d="M 30 25 L 190 25" stroke="#d4af37" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+                  <path d="M 185 20 L 195 25 L 185 30" fill="none" stroke="#d4af37" stroke-width="1" opacity="0.5"/>
+                  <text x="110" y="18" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8.5" fill="#d4af37" letter-spacing="2">HÖGRE AVGIFT · LÄGRE SLUTVÄRDE</text>
+                </svg>
+              </div>
+            </div>
+
+            <div class="fee-baseline">
+              <div>
+                <span class="label">Jämfört med slutvärdet vid 0,2 % avgift</span>
+                <span class="fee-baseline-sub">(med vald avkastning <span id="feeRateLabel"></span>, samma insättningar och skatt)</span>
+              </div>
+              <span class="value" id="feeBaseline"></span>
+            </div>
+
+            <div class="fee-bars" id="feeBars"></div>
+
+            <p class="fire-intro fee-footnote">
+              Över långa tidshorisonter kan några tiondelars procent i avgift bli hundratusentals kronor i förlorat slutvärde. Välj indexfonder med låg avgift (ofta 0,1–0,4 %) när det är möjligt.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <p class="footnote">
+        <b>Om beräkningen</b>
+        Kalkylen antar månadsvisa insättningar vid månadens början. Avkastning räknas med månatlig sammansättning (ränta-på-ränta) baserat på angiven årlig avkastning. ISK-skatten appliceras en gång per år på kontots värde vid årsskiftet, med avdrag för det skattefria grundbeloppet. Scenarierna <em>Stopp efter X år</em> innebär att månadssparandet upphör efter angivet antal år, men kapitalet fortsätter att förränta sig tills slutet av prognosperioden. Resultaten är prognostiska och utgör inte finansiell rådgivning.
+      </p>
+
+      <div class="pwa-section" id="pwaSection" aria-label="App (endast mobil)">
+        <p class="footnote pwa-foot">
+          <b>Ladda ned</b>
+          <span class="pwa-actions">
+            <button type="button" class="pwa-inline" id="pwaInstallBtn" hidden>Installera</button>
+            <a class="pwa-link" id="pwaPublicLink" href="#" target="_blank" rel="noopener noreferrer" hidden>Webbplats</a>
+            <button type="button" class="pwa-inline" id="pwaUpdateBtn" hidden>Uppdatera</button>
+          </span>
+        </p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="app.js" defer></script>
+<script src="pwa.js" defer></script>
+</body>
+</html>
